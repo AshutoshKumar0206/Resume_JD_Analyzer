@@ -91,7 +91,7 @@ const login = async (req, res) => {
                 message: "Invalid credentials"
             });
         }
-        const token = jsonwebtoken_1.default.sign({ email }, process.env.JWT_SECRET || "", { expiresIn: "1d" });
+        const token = jsonwebtoken_1.default.sign({ id: user._id, email }, process.env.JWT_SECRET || "", { expiresIn: "1d" });
         // 4. Set HTTP-Only Cookie
         res.cookie("user_token", token, {
             httpOnly: true, // Prevents XSS attacks

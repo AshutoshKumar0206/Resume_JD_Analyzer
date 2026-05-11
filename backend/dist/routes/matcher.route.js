@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const matcher_controller_1 = require("../controllers/matcher.controller");
+const multer_middleware_1 = require("../middleware/multer.middleware");
+const matcherRouter = (0, express_1.Router)();
+matcherRouter.post("/process-application", auth_middleware_1.authMiddleware, multer_middleware_1.singleUpload.single("resume"), matcher_controller_1.processApplication);
+matcherRouter.get("/get-all-entries", auth_middleware_1.authMiddleware, matcher_controller_1.getAllApplicationEntries);
+exports.default = matcherRouter;
