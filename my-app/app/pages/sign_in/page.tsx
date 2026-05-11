@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation"; // Import the correct router
-import { ROUTES } from "../../api/routes"; // Import your centralized routes
-import Cookies from "js-cookie";
+import { ROUTES } from "../../api/routes";
 import axios from "axios";
 import { toast } from "react-toastify";
+import axiosInstance from "@/app/lib/axiosInstance";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function LoginPage() {
     e.preventDefault();
     
     try {
-      const response = await axios.post("http://localhost:8000/api/auth/login", {
+      const response = await axiosInstance.post("/auth/login", {
         email: email,
         password: password,
       },

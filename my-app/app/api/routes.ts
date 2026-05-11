@@ -6,6 +6,7 @@ export const ROUTES = {
   HOME: "/",
   LOGIN: "/pages/sign_in",
   SIGNUP: "/pages/sign_up",
+  ENTRIES: "/pages/application_entries",
 //   HISTORY: "/history",
   // DASHBOARD: "/",
   

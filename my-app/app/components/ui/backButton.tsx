@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ROUTES } from "../api/routes";
+import { ROUTES } from "@/app/api/routes";
 
 interface BackButtonProps {
   label?: string;

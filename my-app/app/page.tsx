@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "./api/routes";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import axiosInstance from "./lib/axiosInstance";
 
 
 export default function Home() {
@@ -15,6 +17,37 @@ export default function Home() {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAnalyze = async () => {
+    if(!file) {
+      toast.error("Please upload a resume first");
+      return;
+    }
+    setIsAnalyzing(true);
+    try {
+      console.log(file);
+      const formData = new FormData();
+      formData.append("resume", file);
+      formData.append("jdText", jobDescription);
+
+      const res = await axiosInstance.post("/matcher/process-application", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
+      });
+      if(res.data && res.data.success) {
+        toast.success(res.data.message || "Application processed and saved successfully...");
+      } else if(res.data && !res.data.success) {
+        toast.error(res.data.message || "Failed to upload Application and save entry....");
+      }
+    } catch(err: any) {
+      console.log("Error in analyzing resume and jd", err);
+      toast.error(err.message || "Error in uploading resume and JD"); 
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
   
   useEffect(() => {
     const userToken = Cookies.get("is_logged_in");
@@ -165,8 +198,7 @@ export default function Home() {
                         className="hidden" 
                         accept=".pdf,.docx,.doc"
                         onChange={(e) => {
-                          const selectedFile = e.target.files?.[0];
-                          if (selectedFile) setFile(selectedFile);
+                          handleFileChange(e);
                         }}
                       />
                     </label>
@@ -288,13 +320,46 @@ export default function Home() {
           transition={{ delay: 0.2 }}
           className="mt-16 flex flex-col items-center"
         >
-          <button className="cursor-pointer relative group px-16 py-5 bg-white text-black rounded-2xl font-black text-lg overflow-hidden transition-all hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+          <button 
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+          className="cursor-pointer relative group px-16 py-5 bg-white text-black rounded-2xl font-black text-lg overflow-hidden transition-all hover:scale-105 active:scale-95 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-white" />
             <span className="relative z-10 flex items-center gap-3">
-              Analyze Now
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <AnimatePresence mode="wait">
+                {!isAnalyzing ? (
+                  <motion.div
+                    key="initial"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-3"
+                  >
+                    Analyze Now
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-3"
+                  >
+                    {/* Modern Spinner */}
+                    <svg className="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Analyzing...
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {/* <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              </svg> */}
             </span>
           </button>
           {/* <p className="mt-6 text-slate-600 text-sm flex items-center gap-2">

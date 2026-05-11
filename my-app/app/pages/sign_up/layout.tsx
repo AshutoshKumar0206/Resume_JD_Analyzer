@@ -1,6 +1,6 @@
 "use client";
 
-import BackButton from "@/app/components/backButton";
+import BackButton from "@/app/components/ui/backButton";
 import React from "react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
